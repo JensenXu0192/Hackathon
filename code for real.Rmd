@@ -25,10 +25,10 @@ fulldata %>% mutate(ph_k_date = as.Date(fulldata$ph_k_date), st_date = as.Date(f
 fulldata %>% mutate(ph_k_date = as.Date(fulldata$ph_k_date), st_date = as.Date(fulldata$st_date)) -> fulldata
 #missing value indicator, 1 for missing, 0 otherwise
 fulldata %>% mutate(missing_phdate = ifelse(is.na(fulldata$ph_k_date) == 1, 1, 0)) -> fulldata
-
+#data plan prices
+fulldata %>% mutate(data_plan_m8 = as.factor(data_plan_m8)) -> fulldata
+levels(fulldata$data_plan_m8)
 head(fulldata)
-
-
 ```
 
 
@@ -43,5 +43,5 @@ fulldata %>% filter(Sample == "Validation") -> val.d
 ```{r}
 #missing values
 
-
+x
 ````
