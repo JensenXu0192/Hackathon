@@ -51,14 +51,14 @@ fulldata$churn<-as.factor(fulldata$churn)
 
 ```{r}
 #est, val, holdout groups
-fulldata %>% filter(Sample == "Estimation") -> est.d
-fulldata %>% filter(Sample == "Holdout") -> hold.d
-fulldata %>% filter(Sample == "Validation") -> val.d
-corr(fulldata$serv_tick_m1to6,fulldata$serv_tick_m7to8_city)
+fulldata %>% filter(Sample == "Estimation")%>%select(-Sample) -> est.d
+fulldata %>% filter(Sample == "Holdout")%>%select(-Sample) -> hold.d
+fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
+
 ```
 
 ```{r}
-<<<<<<< HEAD
+
 #data munipulaiton
 
 ```
@@ -67,12 +67,10 @@ corr(fulldata$serv_tick_m1to6,fulldata$serv_tick_m7to8_city)
 ```{r}
 as.factor(est.d$churn)->est.d$churn
 levels(est.d$churn)
-fit.logistic <- glm(churn ~.-ph_k_date-st_date,family = binomial,data=est.d)
+fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
 
-=======
-typeof(est.d$churn)
-levels(est.d$churn)
+
 fit.test <- glm(formula = churn ~ ., family = "binomial", data = est.d)
->>>>>>> aebf10f9007cb99335134aebb0b212cf0723c9db
+
 
 ````
