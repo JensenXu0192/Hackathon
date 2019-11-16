@@ -40,6 +40,8 @@ fulldata %>% mutate(churn = factor(fulldata$churn)) -> fulldata
 levels(fulldata$churn)
 levels(fulldata$data_plan_m8)
 head(fulldata)
+#
+fulldata$ph_k_date <- as.POSIXct(na.approx(fulldata$ph_k_date), origin = "2014-7-28")
 ```
 
 ```{r}
@@ -66,7 +68,7 @@ fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
 
 ```{r}
 as.factor(est.d$churn)->est.d$churn
-levels(est.d$churn) #
+levels(est.d$churn) 
 fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
 
 
