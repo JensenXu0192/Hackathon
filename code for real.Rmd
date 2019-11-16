@@ -26,10 +26,18 @@ fulldata %>% mutate(ph_k_date = as.Date(fulldata$ph_k_date), st_date = as.Date(f
 head(fulldata)
 levels(fulldata$data_plan_m8)
 
+#missing value indicator, 1 for missing, 0 otherwise
+fulldata %>% mutate(missing_phdate = ifelse(is.na(fulldata$ph_k_date) == 1, 1, 0)) -> fulldata
+#data plan prices
+fulldata %>% mutate(data_plan_m8 = as.factor(data_plan_m8)) -> fulldata
+levels(fulldata$data_plan_m8)
+head(fulldata)
 ```
-```{r}
-fulldata$cr_score<-as.factor(fulldata$cr_score)
 
+```{r}
+fulldata$ph_k_date<-time(fulldata$ph_k_date)
+fulldata$cr_score<-as.factor(fulldata$cr_score)
+fulldata$churn<-as.factor(fulldata$churn)
 ```
 
 
@@ -38,9 +46,19 @@ fulldata$cr_score<-as.factor(fulldata$cr_score)
 fulldata %>% filter(Sample == "Estimation") -> est.d
 fulldata %>% filter(Sample == "Holdout") -> hold.d
 fulldata %>% filter(Sample == "Validation") -> val.d
-
-````
+corr(fulldata$serv_tick_m1to6,fulldata$serv_tick_m7to8_city)
+```
 
 ```{r}
+#data munipulaiton
+
+```
+
+
+```{r}
+as.factor(est.d$churn)->est.d$churn
+levels(est.d$churn)
+fit.logistic <- glm(churn ~.-ph_k_date-st_date,family = binomial,data=est.d)
+
 
 ````
