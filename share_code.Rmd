@@ -1,0 +1,11 @@
+---
+title: "share_code"
+author: "Jensen Xu"
+date: "16/11/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
