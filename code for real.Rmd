@@ -119,7 +119,10 @@ Model.RanFor <- randomForest(formula =churn~.-bill_city,
 # Predicting on train set
 pred <- predict(Model.RanFor, hold.d,type="prob")
 pred%>%as.data.frame()->pred
+resutl
+pred$`1`->pred
+hold.d$ph_num
+write.csv(sub, 'yourteamname.csv')
 
-?predict()
 
 ```
