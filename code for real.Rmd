@@ -18,6 +18,8 @@ head(city)
 head(acc_phi)
 acc_phi <- inner_join(account, philine, by = "acc_num")
 dplyr::left_join(acc_phi,city,by="bill_city")->fulldata
+#data
+fulldata %>% mutate(ph_k_date = as.Date(fulldata$ph_k_date)) -> fulldata
 head(fulldata)
 ```
 
@@ -31,3 +33,7 @@ fulldata %>% filter(Sample == "Validation") -> val.d
 
 ````
 
+```{r}
+
+
+````
