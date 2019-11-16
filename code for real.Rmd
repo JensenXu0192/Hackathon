@@ -11,11 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(dplyr)
+library(zoo)
 account <- read.csv("ACCOUNT_DATASET_ST.csv")
 philine <- read.csv("PHLINE_DATASET_ST.csv")
 city <- read.csv("CITY_DATASET_ST.csv")
-head(city)
-head(acc_phi)
+
 acc_phi <- inner_join(account, philine, by = "acc_num")
 head(acc_phi)
 dplyr::left_join(acc_phi,city,by="bill_city")->fulldata
@@ -37,7 +37,6 @@ fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 1
 
 #data left over
 fulldata %>% mutate(data_left = data_volume - mon_data) -> fulldata
-
 
 #churn binary
 fulldata %>% mutate(churn = factor(fulldata$churn)) -> fulldata
@@ -63,25 +62,19 @@ fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
 
 ```
 
-```{r}
-
-
-#data munipulaiton
-
-```
 
 
 ```{r}
 as.factor(est.d$churn)->est.d$churn
 levels(est.d$churn) 
+#logistic
 fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
-
-
-fit.test <- glm(formula = churn ~ ., family = "binomial", data = est.d)
+#step wise
+step.logs <- step(fit.logistic, direction = "forward")
 
 typeof(est.d$churn)
 levels(est.d$churn)
 fit.test <- glm(formula = churn ~ - ph_k_date, family = "binomial", data = est.d)
 summary(fit.test)
 
-````
+```
