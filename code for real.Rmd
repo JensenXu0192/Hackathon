@@ -95,3 +95,28 @@ levels(est.d$churn)
 summary(fit.test)
 
 ```
+
+
+```{r}
+est.d$churn<-as.factor(est.d$churn)
+head(est.d)
+
+# Predicting on train set
+predTrain <- predict(Model.RanFor, val.d, type = "response")
+length(predTrain)
+# Checking classification accuracy
+length(val.d$churn)
+table(predTrain,val.d$churn)  
+importance(Model.RanFor) 
+Model.RanFor <- randomForest(formula =churn~.-bill_city,
+                              data =est.d,
+                              importance = TRUE,
+                              ntree = 500, mtry = 4)
+
+# test set
+# Predicting on train set
+pred <- predict(Model.RanFor, hold.d,type="prob")
+pred
+?predict()
+
+```
