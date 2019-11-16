@@ -1,0 +1,220 @@
+---
+title: "code"
+author: "Yuxuan"
+date: "15/11/2019"
+output: html_document
+---
+
+
+required packages
+
+```{r}
+install.packages("tidyverse")
+install.packages("car")
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("nnet")
+install.packages("randomForest")
+install.packages("effects")
+
+```
+
+```{r cars}
+
+library("tidyverse")
+library("car")
+library("rpart")
+library("rpart.plot")
+library("nnet")
+library("randomForest")
+library("effects")
+library(readr)
+library(miceMNAR)
+library(VIM)
+library(CRAN)
+library(imputeTS)
+library(zoo)
+```
+# data cleaning
+
+```{r}
+# read dataset
+library(readr)
+Retention2017 <- read_csv("BADM Hackathon/Retention2017.csv")
+view(Retention2017)
+```
+
+```{r}
+#Transforming date variables
+Retention2017$lost <- as.factor(Retention2017$lost)
+#Convert variables
+Retention2017$created <- as.Date(Retention2017$created,format = "%d/%m/%Y")
+#Counting missing values
+variable.summary(Retention2017)
+#Handle missing values: missing values should be handled differently depending on the situation (Why do we want to handle the missing values in the following variables in the shown method?)
+Retention2017 <- Retention2017[!is.na(Retention2017$firstorder),]
+Retention2017 <- mutate(Retention2017, NA_eclickrate = ifelse(is.na(eclickrate) == 1,1,0))
+Retention2017$eclickrate[Retention2017$NA_eclickrate == 1] <- 0
+#(eclickrate can be NA if the customer never received emails or received emails that never had links)
+Retention2017 <- mutate(Retention2017, NA_refill_doorstep = ifelse(is.na(refill) == 1,1,0))
+Retention2017$refill[Retention2017$NA_refill_doorstep == 1] <- "N"
+Retention2017$doorstep[Retention2017$NA_refill_doorstep == 1] <- "N"
+#(Refill and doorstep: When NA values occur in the same record, the customers could have never been offered these options)
+#Create new variables
+Retention2017$cust_period = as.numeric(Retention2017$lastorder - Retention2017$firstorder)
+#Merge two datasets (Although the 2017 case doesn’t require this, knowing the inner (I) join, outer (O) join, left (L) and right (L) join may come in handy)
+Retention2017_I <- merge(x = Retention2017, y=new, by = "custid") 
+Retention2017_O <- merge(x = Retention2017, y=new, by = "custid", all = TRUE)
+Retention2017_L <- merge(x = Retention2017, y=new, by = "custid", all.x = TRUE)
+Retention2017_R <- merge(x = Retention2017, y=new, by = "custid", all.y = TRUE)
+
+```
+# other method for dealing missing value mice() for missing at random or KNN imputation or linear interoplaitn
+```{r}
+# Impute the missing values with na\_interpolation
+Y<-na_interpolation(train) # linear
+
+#Replaces each missing value with the most recent present value prior to it (Last Observation Carried Forward- LOCF).
+locf<-na_locf(df, option = "locf", na_remaining = "rev", maxgap = Inf)
+locf%>%dplyr::select("WINDDIR","WINDSPEED","TEMPERATURE","DEWPOINT","PRESSURE")%>%as.matrix->mydata2
+
+```
+
+#modeling
+#Running a classification tree
+```{r}
+
+#Running a classification tree
+Model1.RPart <- rpart(formula = lost~
+                        eopenrate
+                        +eclickrate
+                        +avgorder
+                        +ordfreq
+                        +paperless
+                        +refill
+                        +doorstep
+                        +favday
+                        +city
+                        +cust_period,
+                        data = filter(Retention2017, Sample == "Estimation"),
+                        cp = 0.01,
+                        model = TRUE)
+plotcp(Model1.RPart)
+printcp(Model1.RPart)
+rpart.plot(Model1.RPart,
+           type = 0,
+           fallen.leaves = TRUE,
+           uniform = TRUE,
+           yes.text = "TRUE",
+           no.text = "FALSE",
+           cex = .8)
+
+```
+# running losgistic 
+```{r}
+#Running a logistic regression
+Model2.LogReg <- glm(formula = lost ~ 
+                         eopenrate
+                         +eclickrate
+                         +avgorder
+                         +ordfreq
+                         +paperless
+                         +refill
+                         +doorstep
+                         +favday
+                         +city
+                         +cust_period,
+                        data = filter(Retention2017, Sample == "Estimation"),
+                        family = binomial(logit))
+summary(Model2.LogReg)
+```
+#Running a stepwise regression
+```{r}
+#Running a stepwise regression
+Model3.StepReg <- step(Model2.LogReg, direction = "both")
+summary(Model3.StepReg)
+```
+
+#Running a neural network
+
+```{r}
+#Running a neural network
+Model4.NeuNet <- Nnet(formula = lost ~ 
+                        eopenrate
+                        +eclickrate
+                        +avgorder
+                        +ordfreq
+                        +paperless
+                        +refill
+                        +doorstep
+                        +favday
+                        +city
+                        +cust_period,
+                       data = filter(Retention2017, Sample == "Estimation"),
+                       decay = 0.10, # decay parameter
+                       size = 2)
+Model4.NeuNet$value
+summary(Model4.NeuNet)
+
+```
+
+#	Running a random forest
+
+```{r}
+#rf
+Model5.RanFor <- randomForest(formula = lost ~ 
+                              eopenrate
+                              +eclickrate
+                              +avgorder
+                              +ordfreq
+                              +paperless
+                              +refill
+                              +doorstep
+                              +favday
+                              +city
+                              +cust_period,
+                              data = filter(Retention2017, Sample == "Estimation"),
+                              importance = TRUE,
+                              ntree = 500, mtry = 4)
+Model5.RanFor
+importance(Model5.RanFor,type = 2)
+varImpPlot(Model5.RanFor,type = 2, main = "Importance Plot")
+
+```
+
+#Model Assessment & Interpretation
+```{r}
+
+#Build a cumulative captured lift chart
+lift.chart(modelList = c("Model1.RPart", "Model2.LogReg", "Model3.StepReg", "Model4.NeuNet","Model5.RanFor"),
+           data = filter(Retention2017, Sample == "Estimation"),
+           targLevel = "Y", 
+           trueResp = 4749/(30729-7685),
+           type = "cumulative", sub = "Estimation")
+
+```
+
+```{r}
+#Effect Plot for logistic regression
+plot(allEffects(Model2.LogReg),type = "response")
+#Partial Dependence Plot for Random Forest
+partialPlot(Model5.RanFor,
+            pred.data = as.data.frame(filter(Retention2017, Sample == "Validation")),
+            x.var = eopenrate,
+            sub = "Validation Set", 
+            which.class = "Y")
+
+```
+# score for final submission
+
+```{r}
+#Generate predicted probability
+Retention2017$lost.Model1.RPart <- rawProbScore(model = "Model1.RPart",
+                                           data = Retention2017,
+                                          targLevel = "Y")
+Submission.Model1.RPart <- Retention2017[Retention2017$Sample == "Holdout",c("custid","lost.Model1.RPart")]
+names(Submission.Model1.RPart) <- c("custid", "score")
+#write csv
+write.csv(Submission.Model1.RPart,"Submission.Model1.RPart.csv")
+
+```
