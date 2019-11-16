@@ -38,7 +38,7 @@ fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 1
 fulldata$data_left<-as.numeric(fulldata$data_left)
 fulldata$data_volume<-as.numeric(fulldata$data_volume)
 #data left over
-fulldata %>% mutate(data_left = data_volume - mon_data) -> fulldata
+fulldata %>% mutate(data_left = as.numeric(data_volume - mon_data)) -> fulldata
 
 #change to levels
 #fulldata$bill_city%>%as.factor(fulldata$bill_city)
@@ -65,9 +65,7 @@ fulldata$churn<-as.factor(fulldata$churn)
 fulldata %>% filter(Sample == "Estimation")%>%select(-Sample) -> est.d
 fulldata %>% filter(Sample == "Holdout")%>%select(-Sample) -> hold.d
 fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
-
 ```
-
 
 
 ```{r}
@@ -83,8 +81,11 @@ summary(fit.logistic)
 
 #logistic
 fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
+summary(fit.logistic)
+fit.l2 <- glm(churn ~ . -ph_k_date, family = binomial(), data = est.d)
 #step wise
 step.logs <- step(fit.logistic, direction = "forward")
+step.l2 <- step(fit.l2, direction = "forward")
 
 typeof(est.d$data_left)
 
