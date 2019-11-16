@@ -14,5 +14,9 @@ library(dplyr)
 account <- read.csv("ACCOUNT_DATASET_ST.csv")
 philine <- read.csv("PHLINE_DATASET_ST.csv")
 city <- read.csv("CITY_DATASET_ST.csv")
+head(city)
+head(acc_phi)
 acc_phi <- inner_join(account, philine, by = "acc_num")
+dplyr::left_join(acc_phi,city,by="bill_city")->fulldata
+head(fulldata)
 ```
