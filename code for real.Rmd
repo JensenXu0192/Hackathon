@@ -116,7 +116,8 @@ Model.RanFor <- randomForest(formula =churn~.-bill_city,
 # test set
 # Predicting on train set
 pred <- predict(Model.RanFor, hold.d,type="prob")
-pred
+pred%>%as.data.frame()->pred
+
 ?predict()
 
 ```
