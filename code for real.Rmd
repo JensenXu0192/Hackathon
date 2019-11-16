@@ -27,7 +27,7 @@ head(fulldata)
 levels(fulldata$data_plan_m8)
 
 #missing value indicator, 1 for missing, 0 otherwise
-fulldata %>% mutate(missing_phdate = ifelse(is.na(fulldata$ph_k_date) == 1, 1, 0)) -> fulldata
+#fulldata %>% mutate(missing_phdate = ifelse(is.na(fulldata$ph_k_date) == 1, 1, 0)) -> fulldata
 #data plan prices
 fulldata %>% mutate(data_plan_m8 = as.factor(data_plan_m8)) -> fulldata
 
@@ -38,6 +38,8 @@ fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 1
 #data left over
 fulldata %>% mutate(data_left = data_volume - mon_data) -> fulldata
 
+#change to levels
+fulldata$bill_city%>%as.factor(fulldata$bill_city)
 
 #churn binary
 fulldata %>% mutate(churn = factor(fulldata$churn)) -> fulldata
@@ -74,14 +76,15 @@ fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
 ```{r}
 as.factor(est.d$churn)->est.d$churn
 levels(est.d$churn) 
-fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
+head(est.d)
+fit.logistic <- glm(churn ~.-bill_city,family = binomial,data=est.d)
 
 
 fit.test <- glm(formula = churn ~ ., family = "binomial", data = est.d)
-
+summary(fit.logistic)
 typeof(est.d$churn)
 levels(est.d$churn)
-fit.test <- glm(formula = churn ~ - ph_k_date, family = "binomial", data = est.d)
+
 summary(fit.test)
 
 ````
