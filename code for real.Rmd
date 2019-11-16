@@ -8,6 +8,19 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r}
+library("tidyverse")
+library("car")
+library("rpart")
+library("rpart.plot")
+library("nnet")
+library("randomForest")
+library("effects")
+
+
+library(zoo)
+
+```
 
 ```{r}
 library(dplyr)
@@ -83,21 +96,48 @@ summary(fit.logistic)
 
 #logistic
 fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
-summary(fit.logistic)
-fit.l2 <- glm(churn ~ . -ph_k_date, family = binomial(), data = est.d)
+summary(fit.l2)
+fit.l2 <- glm(churn ~., family = binomial(), data = est.d)
 #step wise
 step.logs <- step(fit.logistic, direction = "forward")
 step.l2 <- step(fit.l2, direction = "forward")
 
-typeof(est.d$data_left)
+predict(fit.l2,hold.d,type = "response")%>%as.vector()->pll
 
-typeof(est.d$churn)
-levels(est.d$churn)
+pll
 
 summary(fit.test)
 
 ```
 
+
+```{r}
+head(est.d)
+install.packages("nnet")
+library(nnet)
+require(neuralnet)
+#Running a neural network
+head(est.d)
+est.d%>%select(-bill_city,-ph_num,-ph_k_date)->est.d
+Model4.NeuNet <- nnet(formula =churn~.,
+                       data = est.d,
+                       decay = 0.01, # decay parameter
+                       size = 3)
+
+Model4.NeuNet$value
+
+est.d%>%select(-bill_city,-ph_num)->est.d
+hold.d%>%select(-bill_city,-ph_num)->hold.d
+
+#predict(Model4.NeuNet,val.d,type = c("raw","class"))->pred.m4
+predict(Model4.NeuNet,val.d,type ="raw")
+pred.m4
+table(val.d$churn,predict(Model4.NeuNet,val.d,type ="class"))  
+# Predicting on train set
+
+predict(Model4.NeuNet,hold.d,type = "prob")->pred.m4
+pred.m4
+```
 
 ```{r}
 est.d$churn<-as.factor(est.d$churn)
@@ -110,19 +150,35 @@ length(predTrain)
 length(val.d$churn)
 table(predTrain,val.d$churn)  
 importance(Model.RanFor) 
-Model.RanFor <- randomForest(formula =churn~.-bill_city,
+
+est.d%>%select(-bill_city,-ph_num,-acc_num)->est.d
+hold.d%>%select(-bill_city,-ph_num,-acc_num)->hold.d
+head(est.d)
+Model.RanFor <- randomForest(formula =churn~.,
                               data =est.d,
                               importance = TRUE,
-                              ntree = 500, mtry = 4)
+                              ntree = 400, mtry = 4)
+
 
 # test set
-# Predicting on train set
-pred <- predict(Model.RanFor, hold.d,type="prob")
-pred%>%as.data.frame()->pred
-resutl
-pred$`1`->pred
-hold.d$ph_num
-write.csv(sub, 'yourteamname.csv')
 
+
+#predict(Model4.NeuNet,val.d,type = c("raw","class"))->pred.m4
+pred <- predict(Model.RanFor, val.d,type="prob")
+pred
+table(val.d$churn,predict(fit.l2,val.d,type ="response"))  
+pred%>%as.data.frame()->pred
+result<-NULL%>%as.data.frame()
+
+predict(fit.l2,val.d,type = "response")%>%as.vector()->pll
+length(pll)
+sub$score....pred<-(pll+sub$score....pred)/2
+d$score->s
+length(s+pll)
+d$score<-(pll*0.+s)/2
+head(d)
+d$ph_num
+data.frame(ph_num=hold.d$ph_num,score<-pred)->sub
+write.csv(d, 'Team3.csv')
 
 ```
