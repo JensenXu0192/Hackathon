@@ -17,8 +17,9 @@ city <- read.csv("CITY_DATASET_ST.csv")
 head(city)
 head(acc_phi)
 acc_phi <- inner_join(account, philine, by = "acc_num")
+head(acc_phi)
 dplyr::left_join(acc_phi,city,by="bill_city")->fulldata
-head(fulldata)
+
 ```
 
 
@@ -26,7 +27,7 @@ head(fulldata)
 ```{r}
 #est, val, holdout groups
 fulldata %>% filter(Sample == "Estimation") -> est.d
-fulldata %>% filter(Sample == " Holdout") -> hold.d
+fulldata %>% filter(Sample == "Holdout") -> hold.d
 fulldata %>% filter(Sample == "Validation") -> val.d
 
 ````
