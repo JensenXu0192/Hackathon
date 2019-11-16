@@ -205,7 +205,7 @@ partialPlot(Model5.RanFor,
             which.class = "Y")
 
 ```
-# score for final submission
+# score for final submissions
 
 ```{r}
 #Generate predicted probability
