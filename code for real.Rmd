@@ -11,11 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(dplyr)
+library(zoo)
 account <- read.csv("ACCOUNT_DATASET_ST.csv")
 philine <- read.csv("PHLINE_DATASET_ST.csv")
 city <- read.csv("CITY_DATASET_ST.csv")
-head(city)
-head(acc_phi)
+
 acc_phi <- inner_join(account, philine, by = "acc_num")
 head(acc_phi)
 dplyr::left_join(acc_phi,city,by="bill_city")->fulldata
@@ -33,13 +33,16 @@ fulldata %>% mutate(data_plan_m8 = as.factor(data_plan_m8)) -> fulldata
 
 #data roam volum
 levels(fulldata$data_plan_m8)
-fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 10, 15)) %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "15GB($80)", 15, 25)) -> fulldata
+fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 10, 15)) %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "15GB($80)", 15, 25))-> fulldata
 
+fulldata$data_left<-as.numeric(fulldata$data_left)
+fulldata$data_volume<-as.numeric(fulldata$data_volume)
 #data left over
 fulldata %>% mutate(data_left = data_volume - mon_data) -> fulldata
 
 #change to levels
-fulldata$bill_city%>%as.factor(fulldata$bill_city)
+#fulldata$bill_city%>%as.factor(fulldata$bill_city)
+
 
 #churn binary
 fulldata %>% mutate(churn = factor(fulldata$churn)) -> fulldata
@@ -65,26 +68,29 @@ fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
 
 ```
 
-```{r}
-
-
-#data munipulaiton
-
-```
 
 
 ```{r}
 as.factor(est.d$churn)->est.d$churn
 levels(est.d$churn) 
+
 head(est.d)
 fit.logistic <- glm(churn ~.-bill_city,family = binomial,data=est.d)
 
 
 fit.test <- glm(formula = churn ~ ., family = "binomial", data = est.d)
 summary(fit.logistic)
+
+#logistic
+fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
+#step wise
+step.logs <- step(fit.logistic, direction = "forward")
+
+typeof(est.d$data_left)
+
 typeof(est.d$churn)
 levels(est.d$churn)
 
 summary(fit.test)
 
-````
+```
