@@ -34,7 +34,11 @@ fulldata %>% mutate(data_plan_m8 = as.factor(data_plan_m8)) -> fulldata
 #data roam volum
 levels(fulldata$data_plan_m8)
 fulldata %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "10GB($65)", 10, 15)) %>% mutate(data_volume = ifelse(fulldata$data_plan_m8 == "15GB($80)", 15, 25)) -> fulldata
+
+#data left over
 fulldata %>% mutate(data_left = data_volume - mon_data) -> fulldata
+
+
 #churn binary
 fulldata %>% mutate(churn = factor(fulldata$churn)) -> fulldata
 levels(fulldata$churn)
@@ -61,6 +65,7 @@ fulldata %>% filter(Sample == "Validation")%>%select(-Sample) -> val.d
 
 ```{r}
 
+
 #data munipulaiton
 
 ```
@@ -74,5 +79,9 @@ fit.logistic <- glm(churn ~.,family = binomial,data=est.d)
 
 fit.test <- glm(formula = churn ~ ., family = "binomial", data = est.d)
 
+typeof(est.d$churn)
+levels(est.d$churn)
+fit.test <- glm(formula = churn ~ - ph_k_date, family = "binomial", data = est.d)
+summary(fit.test)
 
 ````
