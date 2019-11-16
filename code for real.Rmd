@@ -13,5 +13,5 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 account <- read.csv("ACCOUNT_DATASET_ST.csv")
 philine <- read.csv("PHLINE_DATASET_ST.csv")
-inner_join(account, philine, by = "acc_num")
+acc_phi <- inner_join(account, philine, by = "acc_num")
 ```
