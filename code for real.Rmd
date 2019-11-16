@@ -15,4 +15,12 @@ account <- read.csv("ACCOUNT_DATASET_ST.csv")
 philine <- read.csv("PHLINE_DATASET_ST.csv")
 city <- read.csv("CITY_DATASET_ST.csv")
 acc_phi <- inner_join(account, philine, by = "acc_num")
+head(acc_phi)
 ```
+
+```{r}
+#est, val, holdout groups
+acc_phi %>% filter(Sample == "Estimation") -> est.d
+acc_phi %>% filter(Sample == " Holdout") -> hold.d
+acc_phi %>% filter(Sample == "Validation") -> val.d
+````
