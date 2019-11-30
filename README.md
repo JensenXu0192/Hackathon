@@ -6,4 +6,4 @@ However, another team who had the same score as ours was officially announced as
 The debate is still unsettled.
 
 
-Note: the code was finished by 3 team members, so the coding style is not uniform.
+Note: the script was finished by 3 team members, so the coding style is not uniform.
