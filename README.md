@@ -6,7 +6,7 @@ However, another team who had the same score as ours was announced as the third 
 The debate is still unsettled.
 
 
-The complete is in the "code" file. The csv files are the data provided and used in this Hackathon.
+The complete model is in the "code" file. The csv files are the data provided and used in this Hackathon.
 
 
 Note: the model was finished by 3 team members, so the coding style is not uniform.
